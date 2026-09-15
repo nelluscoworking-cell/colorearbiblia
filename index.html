@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Historias Bíblicas para Colorear — V8</title>
+<style>
+*{box-sizing:border-box} html,body{margin:0;width:100%;height:100%;font-family:Arial,Helvetica,sans-serif;background:#eaf8ff;overflow:hidden}
+button{font:inherit}
+.screen{position:absolute;inset:0;display:none;overflow:auto}
+.screen.active{display:flex;justify-content:center;align-items:center}
+.artStage{position:relative;width:min(100vw,1775px);aspect-ratio:1672/941;margin:auto;flex:none}
+.artStage>img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block}
+.hotspots{position:absolute;left:8.5%;top:23.3%;width:83%;height:70.3%;display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(4,1fr);gap:1.8% 1.8%}
+.hotspot{background:transparent;border:0;border-radius:24px;cursor:pointer}
+.hotspot:hover{background:rgba(255,255,255,.10);box-shadow:0 0 0 4px rgba(255,193,7,.25) inset}
+.homeHotspot{position:absolute;left:1.1%;top:1.7%;width:7%;height:9%;border:0;background:transparent;cursor:pointer}
+.startHotspot{position:absolute;left:67%;top:72%;width:31%;height:18%;border:0;background:transparent;cursor:pointer}
+.helpHotspot{position:absolute;right:8%;top:2%;width:7%;height:9%;border:0;background:transparent;cursor:pointer}
+#editor{background:linear-gradient(#c8efff,#effbff);flex-direction:column;align-items:center}
+.editorTop{height:70px;width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 18px;flex:none}
+.topBtn{border:0;border-radius:18px;padding:10px 18px;background:#096ee8;color:white;font-weight:800;box-shadow:0 3px 8px #8abbdc;cursor:pointer}
+.titleBar{font-size:clamp(18px,2.2vw,30px);font-weight:900;color:#084fa9;text-align:center;line-height:1.15;white-space:normal}.titleBar .verse{display:block;font-size:.72em;font-weight:800;margin-top:4px;color:#3976b8}
+.editorBody{width:100%;flex:1;display:flex;min-height:0;gap:12px;padding:8px 18px 18px}
+.palette{width:150px;display:flex;flex-direction:column;align-items:center;gap:10px;padding:8px;background:#fff;border:4px solid #b9eaff;border-radius:22px;box-shadow:0 5px 15px #9dcde2;overflow:auto}
+.tool{width:92px;min-height:54px;border:3px solid #d8e9f7;border-radius:16px;background:white;color:#0754a6;font-weight:900;cursor:pointer}
+.tool.active{border-color:#ffb900;box-shadow:0 0 0 3px #ffe17a}
+.colors{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.color{width:44px;height:44px;border-radius:50%;border:4px solid white;box-shadow:0 2px 7px #aaa;cursor:pointer}
+.canvasWrap{flex:1;min-width:0;display:flex;justify-content:center;align-items:center;background:#fff;border-radius:24px;border:5px solid #d4f2ff;box-shadow:0 5px 18px #8dbcd2;overflow:hidden}
+#paintCanvas{max-width:100%;max-height:100%;width:auto;height:auto;image-rendering:auto;touch-action:none;cursor:crosshair}
+.sideNav{width:76px;display:flex;flex-direction:column;justify-content:center;gap:18px}
+.homeStage{width:min(92vw,512px);height:min(92vh,768px);aspect-ratio:2/3;position:relative;margin:auto;flex:none;border-radius:28px;overflow:hidden;box-shadow:0 10px 35px rgba(0,80,130,.25);background:#fff}
+.homeStage>img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block}
+.navBtn{width:66px;height:66px;border:0;border-radius:50%;background:#0875ea;color:white;font-size:38px;font-weight:900;box-shadow:0 4px 10px #8dbbd3;cursor:pointer}
+@media(max-width:700px){
+ .editorTop{height:58px;padding:6px 8px}.topBtn{padding:8px 10px;font-size:13px}.editorBody{padding:5px;gap:5px}.palette{width:82px;border-width:2px;border-radius:14px;gap:5px}.tool{width:62px;min-height:42px;font-size:11px;padding:4px}.color{width:26px;height:26px;border-width:2px}.sideNav{width:44px}.navBtn{width:42px;height:42px;font-size:24px}
+ .homeStage{width:min(92vw,430px);height:min(90vh,645px);aspect-ratio:2/3;position:relative;margin:auto;flex:none;border-radius:28px;overflow:hidden;box-shadow:0 10px 35px rgba(0,80,130,.25);background:#fff}
+ .homeStage>img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block}
+ .coverOverlay{position:absolute;left:6%;right:auto;top:67%;width:46%;height:8%;display:flex;align-items:flex-start;justify-content:flex-start;padding:0;z-index:10;pointer-events:none}
+ .startButton{pointer-events:auto;width:min(95%,245px);min-height:49px;border:4px solid #fff;border-radius:22px;background:#0875ea;color:#fff;font-size:clamp(15px,4vw,22px);font-weight:900;box-shadow:0 6px 14px rgba(0,0,0,.3);cursor:pointer;padding:12px 18px}
+ .startButton:hover{filter:brightness(1.05);transform:translateY(-1px)}
+
+ .menuPage{width:min(94vw,620px);min-height:calc(100vh - 24px);background:linear-gradient(#c8efff,#effbff);padding:16px 14px 30px;display:flex;flex-direction:column;border-radius:28px;box-shadow:0 10px 35px rgba(0,80,130,.18);margin:12px auto}
+ .menuHead{display:flex;align-items:center;gap:10px;margin-bottom:16px;position:sticky;top:0;z-index:2;background:linear-gradient(#c8efff,#c8efff);padding-bottom:6px}.menuHead h1{flex:1;text-align:center;color:#0754a6;font-size:clamp(20px,5vw,28px);margin:0;font-weight:900}.menuBack{border:0;background:#0875ea;color:#fff;border-radius:16px;padding:10px 14px;font-weight:900;cursor:pointer;white-space:nowrap}
+ .menuHint{color:#3976b8;text-align:center;font-weight:800;font-size:13px;margin:-4px 0 10px}.storyGrid{display:grid !important;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;overflow:visible;padding:4px;align-content:start;width:100%}
+ .storyCard{border:3px solid #d5efff;border-radius:18px;background:#fff;padding:7px;box-shadow:0 4px 12px rgba(80,150,190,.18);cursor:pointer;text-align:center}.storyCard:hover{border-color:#ffbd19}.storyCard img{width:100%;aspect-ratio:3/4;object-fit:contain;display:block;background:#fff;border-radius:12px}.storyTitle{margin-top:6px;color:#0754a6;font-size:12px;line-height:1.18;font-weight:900}.storyVerse{color:#3976b8;font-size:11px;font-weight:800;margin-top:2px}
+}
+@media(min-width:701px){
+ #home{background:linear-gradient(#eaf8ff,#d7f5ff);align-items:center}
+ #home .homeStage{width:min(92vw,512px);height:min(92vh,768px);aspect-ratio:2/3}
+ #home .homeStage>img{object-fit:contain}
+ #menu{align-items:flex-start;overflow-y:auto;overflow-x:hidden;padding:0 0 18px}
+ .menuPage{width:min(94vw,920px);min-height:calc(100vh - 24px);margin:12px auto;border-radius:28px;box-shadow:0 10px 35px rgba(0,80,130,.18);overflow:visible}
+ .storyGrid{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+ .storyCard{min-width:0}
+ .storyCard img{aspect-ratio:3/4;width:100%;height:auto;object-fit:contain}
+}
+.coverOverlay{position:absolute;left:6%;right:auto;top:67%;width:46%;height:8%;display:flex;align-items:flex-start;justify-content:flex-start;padding:0;z-index:10;pointer-events:none}
+.startButton{pointer-events:auto;width:min(95%,245px);min-height:43px;border:3px solid #fff;border-radius:18px;background:#0875ea;color:#fff;font-size:clamp(14px,1.7vw,20px);font-weight:900;box-shadow:0 6px 14px rgba(0,0,0,.3);cursor:pointer;padding:10px 14px;display:block}
+.startButton:hover{filter:brightness(1.05);transform:translateY(-1px)}
+.modal{position:fixed;inset:0;background:rgba(0,50,100,.45);display:none;align-items:center;justify-content:center;padding:20px;z-index:20}
+.modal.show{display:flex}.modalCard{background:white;border-radius:28px;padding:28px;max-width:520px;text-align:center;box-shadow:0 20px 60px #235}
+.modalCard h2{color:#0754a6}.modalCard p{color:#245}
+
+/* Layout definitivo: a Página 2 é uma grade de miniaturas clicáveis; nunca empilha os 20 desenhos na mesma tela. */
+#menu.active{display:block;overflow-y:auto;overflow-x:hidden}
+#menu .menuPage{width:min(94vw,920px)}
+#menu .storyGrid{display:grid !important}
+#menu .storyCard{display:block;width:100%;appearance:none}
+#menu .storyCard img{width:100%;height:auto;object-fit:contain}
+@media (min-width:701px){#menu .storyGrid{grid-template-columns:repeat(4,minmax(0,1fr)) !important}}
+@media (max-width:700px){
+  #home .homeStage{width:min(92vw,430px);height:auto;max-height:90vh;aspect-ratio:2/3}
+  #home .homeStage>img{object-fit:contain}
+  #menu .menuPage{width:94vw;min-height:calc(100vh - 24px);padding:12px 10px 24px}
+  #menu .storyGrid{grid-template-columns:repeat(2,minmax(0,1fr)) !important}
+}
+</style>
+<link rel="preload" as="image" href="assets/capa.png" fetchpriority="high">
+</head>
+<body>
+<section id="home" class="screen active">
+  <div class="homeStage">
+    <img id="coverImg" src="assets/capa.png" alt="Historias Bíblicas para Colorear" fetchpriority="high" decoding="async">
+    <div class="coverOverlay">
+      <button class="startButton" type="button" aria-label="Comenzar a colorear">🎨 COMENZAR A COLOREAR</button>
+    </div>
+  </div>
+</section>
+
+<section id="menu" class="screen">
+  <div class="menuPage">
+    <div class="menuHead">
+      <button class="menuBack" id="menuHome">← Inicio</button>
+      <h1>📖 Elige una historia</h1>
+    </div>
+    <div class="menuHint">Selecciona una historia para comenzar a colorear.</div>
+    <div id="storyGrid" class="storyGrid"></div>
+  </div>
+</section>
+
+<section id="editor" class="screen">
+  <div class="editorTop">
+    <button class="topBtn" id="backMenu">← Historias</button>
+    <div class="titleBar" id="editorTitle">Historia</div>
+    <button class="topBtn" id="clearBtn">↺ Reiniciar</button>
+  </div>
+  <div class="editorBody">
+    <aside class="palette">
+      <button class="tool active" id="bucketBtn">🪣<br>Cubo de pintura</button>
+      <button class="tool" id="eraserBtn">🧽<br>Borrador</button>
+      <div class="colors" id="colors"></div>
+      <button class="tool" id="undoBtn">↩️<br>Deshacer</button>
+      <button class="tool" id="redoBtn">↪️<br>Rehacer</button>
+    </aside>
+    <div class="canvasWrap"><canvas id="paintCanvas"></canvas></div>
+    <aside class="sideNav">
+      <button class="navBtn" id="prevBtn" aria-label="Historia anterior" title="Historia anterior">‹</button>
+      <button class="navBtn" id="nextBtn" aria-label="Siguiente historia" title="Siguiente historia">›</button>
+    </aside>
+  </div>
+</section>
+
+<div id="modal" class="modal">
+ <div class="modalCard">
+  <h2>🎨 ¡A colorear!</h2>
+  <p>Elige un color y toca una parte del dibujo. Puedes cambiar el color de una parte ya pintada, usar el borrador, deshacer o rehacer cuando quieras.</p>
+  <button class="topBtn" id="closeModal">¡Entendido!</button>
+ </div>
+</div>
+
+<script>
+const DATA = {"titles":["Adán y Eva en el jardín - Génesis 2-3","Noé y el arca - Génesis 6-9","La torre de Babel - Génesis 11","Moisés y el Mar Rojo - Éxodo 14","El profeta Samuel - 1 Samuel 3","Reina Ester - Ester 4:14b","David y Goliat - I Samuel 17","Daniel y los leones - Daniel 6","Jericó y sus murallas - Josué 6","Rut y Noemí - Rut 1-2","Jonás y el gran pez - Jonás 1-2","Elías en el monte Carmelo - 1 Reyes 18","La fuerza de Sansón - Jueces 13","El nacimiento de Jesús - Lucas 2","Jesús calma la tormenta - Marcos 4","Pedro, Santiago y Juan en la barquita - Lucas 5","El buen samaritano - Lucas 10","Jesús alimenta a la multitud - Juan 6","El pastor y sus ovejas - Juan 10","Jesús regresando sobre las nubes - Mateo 24"],"drawings":["assets/historia-01.png","assets/historia-02.png","assets/historia-03.png","assets/historia-04.png","assets/historia-05.png","assets/historia-06.png","assets/historia-07.png","assets/historia-08.png","assets/historia-09.png","assets/historia-10.png","assets/historia-11.png","assets/historia-12.png","assets/historia-13.png","assets/historia-14.png","assets/historia-15.png","assets/historia-16.png","assets/historia-17.png","assets/historia-18.png","assets/historia-19.png","assets/historia-20.png"],"cover":"assets/capa.png"};
+const home = document.getElementById('home');
+const menu = document.getElementById('menu');
+const editor = document.getElementById('editor');
+document.getElementById('coverImg').src = DATA.cover;
+
+function show(s){[home,menu,editor].forEach(x=>x.classList.remove('active'));s.classList.add('active')}
+document.querySelector('.startButton').onclick=()=>show(menu);
+document.getElementById('menuHome').onclick=()=>show(home);
+
+const grid=document.getElementById('storyGrid');
+DATA.titles.forEach((t,i)=>{
+ const card=document.createElement('button');
+ card.className='storyCard'; card.type='button'; card.setAttribute('aria-label',t);
+ const im=document.createElement('img'); im.src=DATA.drawings[i]; im.alt=t; im.loading='lazy'; im.decoding='async';
+ const parts=t.replace(/^\d+\s*-\s*/, '').split(' - ');
+ const title=parts[0] || t;
+ const verse=parts.slice(1).join(' - ');
+ card.innerHTML=''; card.appendChild(im);
+ const tt=document.createElement('div'); tt.className='storyTitle'; tt.textContent=title; card.appendChild(tt);
+ if(verse){ const vv=document.createElement('div'); vv.className='storyVerse'; vv.textContent=verse; card.appendChild(vv); }
+ card.onclick=()=>openEditor(i); grid.appendChild(card);
+});
+
+const canvas=document.getElementById('paintCanvas');
+const ctx=canvas.getContext('2d',{willReadFrequently:true});
+let imgObj=null, current=0, tool='bucket', color='#ff3b5f';
+let undoStack=[], redoStack=[];
+let basePixels=null, lineMask=null;
+
+// Paleta ampliada para a criança ter mais opções de pintura.
+const colors=[
+ '#ff3b5f', // vermelho
+ '#c62828', // vermelho escuro
+ '#ff8c2f', // laranja
+ '#ffd21f', // amarelo
+ '#fff176', // amarelo claro
+ '#7bdc3d', // verde claro
+ '#2e8b57', // verde
+ '#0b6b3a', // verde escuro
+ '#00bcd4', // ciano
+ '#2488ff', // azul
+ '#7c4dff', // roxo
+ '#e85bd8', // rosa
+ '#ffb6c1', // rosa claro
+ '#f1d3a2', // bege
+ '#8d5a3b', // marrom
+ '#9e9e9e', // cinza
+ '#555555', // cinza escuro
+ '#222222', // preto
+ '#ffffff'  // branco
+];
+
+const colorNames={
+ '#ff3b5f':'Vermelho','#c62828':'Vermelho escuro','#ff8c2f':'Laranja','#ffd21f':'Amarelo',
+ '#fff176':'Amarelo claro','#7bdc3d':'Verde claro','#2e8b57':'Verde','#0b6b3a':'Verde escuro',
+ '#00bcd4':'Azul-turquesa','#2488ff':'Azul','#7c4dff':'Roxo','#e85bd8':'Rosa',
+ '#ffb6c1':'Rosa claro','#f1d3a2':'Bege','#8d5a3b':'Marrom','#9e9e9e':'Cinza',
+ '#555555':'Cinza escuro','#222222':'Preto','#ffffff':'Branco'
+};
+
+const colorBox=document.getElementById('colors');
+colors.forEach(c=>{
+ const b=document.createElement('button');
+ b.className='color';
+ b.style.background=c;
+ b.title=colorNames[c]||c;
+ b.setAttribute('aria-label',colorNames[c]||c);
+ b.onclick=()=>{color=c;tool='bucket';setTool();};
+ colorBox.appendChild(b);
+});
+
+function setTool(){
+ document.getElementById('bucketBtn').classList.toggle('active',tool==='bucket');
+ document.getElementById('eraserBtn').classList.toggle('active',tool==='eraser');
+}
+document.getElementById('bucketBtn').onclick=()=>{tool='bucket';setTool()};
+document.getElementById('eraserBtn').onclick=()=>{tool='eraser';setTool()};
+
+function snapshot(){return ctx.getImageData(0,0,canvas.width,canvas.height)}
+function restore(im){ctx.putImageData(im,0,0)}
+function pushUndo(){
+ undoStack.push(snapshot());
+ if(undoStack.length>30)undoStack.shift();
+ redoStack=[];
+}
+document.getElementById('undoBtn').onclick=()=>{
+ if(!undoStack.length)return;
+ redoStack.push(snapshot());
+ restore(undoStack.pop());
+};
+document.getElementById('redoBtn').onclick=()=>{
+ if(!redoStack.length)return;
+ undoStack.push(snapshot());
+ restore(redoStack.pop());
+};
+document.getElementById('clearBtn').onclick=()=>{
+ if(imgObj){pushUndo();drawBase()}
+};
+
+function luminance(r,g,b){return 0.299*r+0.587*g+0.114*b}
+function hexRGB(hex){
+ const n=parseInt(hex.slice(1),16);
+ return [(n>>16)&255,(n>>8)&255,n&255];
+}
+
+// Cria uma máscara invisível das linhas usando a imagem ORIGINAL.
+// Ela não altera o desenho que a criança vê.
+function buildLineMask(){
+ const w=canvas.width,h=canvas.height,src=basePixels;
+ const raw=new Uint8Array(w*h);
+ // Considera como barreira os traços pretos e cinzas escuros do desenho.
+ // Tolerância maior captura o antialias sem transformar áreas claras em barreiras.
+ const THRESHOLD=(current===11||current===13)?235:210;
+ for(let i=0,j=0;i<raw.length;i++,j+=4){
+   raw[i]=(src[j+3]>10 && luminance(src[j],src[j+1],src[j+2])<THRESHOLD)?1:0;
+ }
+ // Fecha microfalhas dos contornos, mas com raio pequeno para não bloquear
+ // regiões estreitas como folhas, chão, roupas e detalhes da árvore.
+ const radius=(current===11||current===13)?2:1;
+ const horiz=new Uint8Array(raw.length);
+ for(let y=0;y<h;y++){
+   const row=y*w;
+   for(let x=0;x<w;x++){
+     let hit=0;
+     for(let xx=Math.max(0,x-radius);xx<=Math.min(w-1,x+radius);xx++) if(raw[row+xx]){hit=1;break;}
+     horiz[row+x]=hit;
+   }
+ }
+ const out=new Uint8Array(raw.length);
+ for(let y=0;y<h;y++){
+   const row=y*w;
+   for(let x=0;x<w;x++){
+     let hit=0;
+     for(let yy=Math.max(0,y-radius);yy<=Math.min(h-1,y+radius);yy++) if(horiz[yy*w+x]){hit=1;break;}
+     out[row+x]=hit;
+   }
+ }
+ lineMask=out;
+}
+function drawBase(){
+ canvas.width=imgObj.naturalWidth;
+ canvas.height=imgObj.naturalHeight;
+ ctx.clearRect(0,0,canvas.width,canvas.height);
+ ctx.drawImage(imgObj,0,0);
+ // Guarda uma cópia permanente da imagem original para o borrador.
+ basePixels=ctx.getImageData(0,0,canvas.width,canvas.height).data.slice();
+ buildLineMask();
+}
+
+function openEditor(i){
+ current=i;
+ const clean=DATA.titles[i].replace(/^\s*\d+\s*-\s*/, '').trim(); const parts=clean.split(/\s*-\s*(?=[A-Za-zÁÉÍÓÚáéíóúÀ-ÿ])/); const title=parts[0].trim(); const verse=parts.slice(1).join(' - ').trim(); document.getElementById('editorTitle').innerHTML=title+(verse?'<span class="verse">'+verse+'</span>':'');
+ show(editor);
+ undoStack=[];redoStack=[];
+ basePixels=null;lineMask=null;
+ imgObj=new Image();
+ imgObj.onload=drawBase;
+ imgObj.src=DATA.drawings[i];
+}
+
+document.getElementById('backMenu').onclick=()=>show(menu);
+document.getElementById('prevBtn').onclick=()=>openEditor((current+19)%20);
+document.getElementById('nextBtn').onclick=()=>openEditor((current+1)%20);
+
+// Encontra a região fechada onde a criança clicou.
+// Trabalha SEM olhar para a cor atual do canvas, então uma região já pintada
+// pode receber outra cor normalmente.
+function getRegion(sx,sy){
+ const w=canvas.width,h=canvas.height;
+ if(!lineMask)buildLineMask();
+ let x=Math.max(0,Math.min(w-1,Math.round(sx)));
+ let y=Math.max(0,Math.min(h-1,Math.round(sy)));
+ let start=y*w+x;
+ // Se o toque cair no traço, procura o interior imediatamente próximo.
+ if(lineMask[start]){
+   let found=-1;
+   for(let r=1;r<=12 && found<0;r++){
+     for(let dy=-r;dy<=r && found<0;dy++) for(let dx=-r;dx<=r;dx++){
+       const nx=x+dx,ny=y+dy;
+       if(nx<0||ny<0||nx>=w||ny>=h)continue;
+       const pos=ny*w+nx;
+       if(!lineMask[pos]){found=pos;break;}
+     }
+   }
+   if(found<0)return null;
+   start=found;
+ }
+ if(lineMask[start])return null;
+ const seen=new Uint8Array(w*h);
+ const queue=new Int32Array(w*h);
+ let head=0,tail=0;
+ seen[start]=1;queue[tail++]=start;
+ while(head<tail){
+   const pos=queue[head++],x0=pos%w,y0=(pos/w)|0;
+   if(x0>0){const q=pos-1;if(!seen[q]&&!lineMask[q]){seen[q]=1;queue[tail++]=q;}}
+   if(x0<w-1){const q=pos+1;if(!seen[q]&&!lineMask[q]){seen[q]=1;queue[tail++]=q;}}
+   if(y0>0){const q=pos-w;if(!seen[q]&&!lineMask[q]){seen[q]=1;queue[tail++]=q;}}
+   if(y0<h-1){const q=pos+w;if(!seen[q]&&!lineMask[q]){seen[q]=1;queue[tail++]=q;}}
+ }
+ // A moldura preta contínua fecha a imagem. Portanto não precisamos bloquear
+ // regiões que encostam nas bordas: árvore, chão e céu também podem ser pintados.
+ // Apenas evita que um clique acidental no fundo externo pinte uma área gigantesca.
+ const startK=start*4;
+ const startLum=luminance(basePixels[startK],basePixels[startK+1],basePixels[startK+2]);
+ if(tail>w*h*0.70 && startLum>245)return null;
+ return queue.subarray(0,tail);
+}
+function paintRegion(region,rgb){
+ const w=canvas.width,h=canvas.height;
+ const data=ctx.getImageData(0,0,w,h);
+ const p=data.data;
+
+ // Pinta toda a região encontrada pela máscara original.
+ // Como a máscara vem do desenho ORIGINAL, a região continua sendo a mesma
+ // mesmo depois que a criança troca a cor várias vezes.
+ for(let i=0;i<region.length;i++){
+   const pos=region[i];
+   if(lineMask[pos])continue;
+   const k=pos*4;
+   p[k]=rgb[0]; p[k+1]=rgb[1]; p[k+2]=rgb[2]; p[k+3]=255;
+ }
+
+ // Mantém os traços/contornos originais, inclusive o antialias.
+ // Isso evita que a pintura cubra as linhas pretas do desenho.
+ for(let i=0;i<region.length;i++){
+   const pos=region[i];
+   if(!lineMask[pos])continue;
+   const k=pos*4;
+   p[k]=basePixels[k]; p[k+1]=basePixels[k+1];
+   p[k+2]=basePixels[k+2]; p[k+3]=basePixels[k+3];
+ }
+
+ ctx.putImageData(data,0,0);
+}
+function eraseRegion(region){
+ const data=ctx.getImageData(0,0,canvas.width,canvas.height);
+ const p=data.data;
+ for(let i=0;i<region.length;i++){
+   const pos=region[i],k=pos*4;
+   // O borrador volta somente o preenchimento para a arte original.
+   // As linhas e todos os detalhes permanecem intactos.
+   p[k]=basePixels[k];p[k+1]=basePixels[k+1];p[k+2]=basePixels[k+2];p[k+3]=basePixels[k+3];
+ }
+ ctx.putImageData(data,0,0);
+}
+
+canvas.addEventListener('pointerdown',e=>{
+ if(!imgObj || !basePixels)return;
+ e.preventDefault();
+ const r=canvas.getBoundingClientRect();
+ const sx=(e.clientX-r.left)*canvas.width/r.width;
+ const sy=(e.clientY-r.top)*canvas.height/r.height;
+ const region=getRegion(sx,sy);
+ if(!region || region.length<3)return;
+ pushUndo();
+ if(tool==='eraser') eraseRegion(region);
+ else paintRegion(region,hexRGB(color));
+});
+</script>
+</body>
+</html>
