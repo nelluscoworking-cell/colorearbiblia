@@ -87,6 +87,12 @@ button{font:inherit}
 .colors{order:-1;width:100%;grid-template-columns:repeat(11,minmax(0,1fr));gap:5px;justify-items:center}
 .color{width:26px;height:26px;max-width:100%;border-width:2px}.tool{width:auto;min-width:65px;min-height:42px;padding:5px 8px}
 }
+/* Mantém cores e setas circulares também em telas estreitas. */
+@media(max-width:700px){
+ .colors{grid-template-columns:repeat(auto-fit,minmax(26px,1fr))}
+ .color{box-sizing:border-box;width:26px;height:26px;min-width:26px;min-height:26px;max-width:none;aspect-ratio:1/1;padding:0;flex-shrink:0;border-radius:50%}
+ .navBtn{box-sizing:border-box;width:42px;height:42px;min-width:42px;min-height:42px;aspect-ratio:1/1;padding:0;flex:0 0 42px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+}
 </style>
 </head>
 <body>
