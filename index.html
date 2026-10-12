@@ -102,6 +102,12 @@ button{font:inherit}
  .palette .colors{flex-shrink:0}
 }
 </style>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
+<meta name="theme-color" content="#eaf8ff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Bíblia Colorir">
 </head>
 <body>
 <section id="home" class="screen active">
@@ -436,6 +442,20 @@ canvas.addEventListener('pointerdown',e=>{
  if(tool==='eraser') eraseRegion(region);
  else paintRegion(region,hexRGB(color));
 });
+</script>
+<script>
+// Instalação web apenas em HTTPS/localhost; não interfere no APK.
+if ('serviceWorker' in navigator &&
+    (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1') &&
+    !(window.Capacitor && window.Capacitor.isNativePlatform())) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').then(async registration => {
+      const ready = await navigator.serviceWorker.ready;
+      const worker = ready.active;
+      if (worker) worker.postMessage({type: 'CACHE_DRAWINGS'});
+    }).catch(error => console.warn('Instalação offline indisponível:', error));
+  });
+}
 </script>
 </body>
 </html>

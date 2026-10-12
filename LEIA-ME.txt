@@ -1,0 +1,6 @@
+Envie todo o conteúdo deste ZIP ao repositório/site: index.html, assets, icons, manifest.webmanifest e sw.js. Não envie apenas o HTML.
+
+Android: abra o site no Chrome e use o menu para Instalar aplicativo ou Adicionar à tela inicial.
+iPhone: abra no Safari, Compartilhar > Adicionar à Tela de Início.
+
+O ícone usa a imagem enviada. O modo offline fica pronto depois da primeira visita com internet e do término do download em segundo plano. O ícone do APK é independente e não é alterado por este pacote web.
