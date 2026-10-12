@@ -1,6 +1,3 @@
-Envie todo o conteúdo deste ZIP ao repositório/site: index.html, assets, icons, manifest.webmanifest e sw.js. Não envie apenas o HTML.
+Atualize todos os arquivos deste ZIP no GitHub, preservando pastas. O Android pode manter o ícone antigo: após publicar, remova o aplicativo/atalho PWA da tela inicial, abra o site no Chrome e instale novamente. Não precisa mexer no APK para atualizar a PWA.
 
-Android: abra o site no Chrome e use o menu para Instalar aplicativo ou Adicionar à tela inicial.
-iPhone: abra no Safari, Compartilhar > Adicionar à Tela de Início.
-
-O ícone usa a imagem enviada. O modo offline fica pronto depois da primeira visita com internet e do término do download em segundo plano. O ícone do APK é independente e não é alterado por este pacote web.
+O ícone foi definido como maskable, sem margens brancas adicionadas à imagem. A PWA instalada abre a página salva imediatamente, enquanto procura atualizações em segundo plano. A capa foi convertida para WebP sem perda: pixels idênticos, arquivo menor. Os desenhos e o layout foram mantidos. O uso offline requer a primeira visita completa com internet.
