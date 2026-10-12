@@ -96,6 +96,11 @@ button{font:inherit}
 /* O quadro acompanha a proporção da capa sem faixas brancas. */
 #home .homeStage{width:min(92vw,512px,61.333vh);height:auto;max-height:none;aspect-ratio:2/3}
 @media(max-width:700px){#home .homeStage{width:min(92vw,430px,60vh)}}
+/* Reserva espaço para o texto das ferramentas no computador. */
+@media(min-width:701px){
+ .palette .tool{flex-shrink:0;height:auto;min-height:76px;padding:8px 4px;line-height:1.2}
+ .palette .colors{flex-shrink:0}
+}
 </style>
 </head>
 <body>
